@@ -40,3 +40,24 @@
              (traversal-unit left-bot) (traversal-unit right-bot)}
            (neighbours-of grid-3x3 mid-bot))
         "bottom edge")))
+
+(deftest navigation
+  (let [big-grid (create-grid 5 5)
+        some-start (cell 0 0)
+        some-neighbour (cell 1 0)]
+    (is (= []
+           (navigate-to big-grid some-start some-start))
+        "when navigating to self, route is empty")
+    (is (= [some-neighbour]
+           (navigate-to big-grid some-start some-neighbour))
+        "when navigating to neighbour, only destination in route")
+    (is (= [(cell 1 0) (cell 2 0)]
+           (navigate-to big-grid (cell 0 0) (cell 2 0)))
+        "straight simple route")
+    (is (= [(cell 1 1) (cell 2 2)]
+           (navigate-to big-grid (cell 0 0) (cell 2 2)))
+        "another simple route")
+    (is (= [(cell 0 1) (cell 0 2)]
+           (navigate-to big-grid (cell 0 0) (cell 0 2)))
+        "shortest route")
+    ))
