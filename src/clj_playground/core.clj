@@ -79,7 +79,6 @@ and :traversals is a map of cells to costs ??"
                                               [neighbour (+ current-cost cost)]))
             ;; keep bigger distances
             ;; ...first merge in seen neighbours, keeping higher values
-            all-open-nodes (set (map #(% :cell) open-nodes))
             better-neighbours (->> open-nodes
                                    (filter
                                     (fn [{open-cell :cell current-cost :cost :as open-node}]
@@ -95,6 +94,7 @@ and :traversals is a map of cells to costs ??"
                               open-nodes)
             updated-parents (reduce #(assoc %1 %2 current-node) {} better-neighbours)
             ;; ...then create new neighbours
+            all-open-nodes (set (map #(% :cell) open-nodes))
             new-neighbours (set/difference unvisited-neighbours all-open-nodes)
             new-open-nodes (map #(traversal (neighbour-total-distances %) %) new-neighbours)
             new-parents (reduce #(assoc %1 %2 current-node) {} new-neighbours)]
@@ -102,4 +102,4 @@ and :traversals is a map of cells to costs ??"
                (conj visited-nodes current-node)
                (merge parents updated-parents new-parents))))))
 
-;;(navigate-to (create-grid 5 5) (cell 0 0) (cell 2 0))
+;;(navigate-to (create-grid 5 5) (cell 0 0) (cell 0 2))
