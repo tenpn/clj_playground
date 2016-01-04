@@ -50,30 +50,30 @@ and :traversals is a map of cells to costs ??"
 
 ;; (neighbours-of (create-grid 3 3) (cell 1 1))
 
-(defn create-route [parents current-node]
-  "takes a parents list of form {child parent} and finds route from current-node to first nil parent"
-  (loop [current-node current-node
+(defn create-route [parents current-cell]
+  "takes a parents list of form {child parent} and finds route from current-cell to first nil parent"
+  (loop [current-cell current-cell
          created-route '()]
-    (let [parent (parents current-node)]
+    (let [parent (parents current-cell)]
       (if (nil? parent) ;; at end of the road
         created-route 
         (recur parent
-               (conj created-route current-node))))))
+               (conj created-route current-cell))))))
 
 (defn navigate-to [grid start dest]
   "provides route from start to dest, not including start"
   (validate-cell grid start)
   (validate-cell grid dest)
-  (loop [[{current-node :cell current-cost :cost} & open-nodes] (list (traversal 0 start))
-         visited-nodes #{}
+  (loop [[{current-cell :cell current-cost :cost} & open-nodes] (list (traversal 0 start))
+         visited-cells #{}
          parents {}]
-    (if (= dest current-node) 
-      (create-route parents current-node) 
+    (if (= dest current-cell) 
+      (create-route parents current-cell) 
       (let [;; traversals is list of {:cell :cost}
             {all-neighbours :neighbours traversals :traversals} (neighbours-of
                                                                  grid
-                                                                 current-node)
-            unvisited-neighbours (set/difference all-neighbours visited-nodes)
+                                                                 current-cell)
+            unvisited-neighbours (set/difference all-neighbours visited-cells)
             ;; add current route cost to traversals:
             neighbour-total-distances (into {}
                                             (for [[neighbour cost] traversals]
@@ -93,14 +93,14 @@ and :traversals is a map of cells to costs ??"
                                  (traversal (neighbour-total-distances open-cell) open-cell)
                                  open-node))
                               open-nodes)
-            updated-parents (reduce #(assoc %1 %2 current-node) {} better-neighbours)
+            updated-parents (reduce #(assoc %1 %2 current-cell) {} better-neighbours)
             ;; ...then create new neighbours
-            all-open-nodes (set (map #(% :cell) open-nodes))
-            new-neighbours (set/difference unvisited-neighbours all-open-nodes)
+            all-open-cells (set (map #(% :cell) open-nodes))
+            new-neighbours (set/difference unvisited-neighbours all-open-cells)
             new-open-nodes (map #(traversal (neighbour-total-distances %) %) new-neighbours)
-            new-parents (reduce #(assoc %1 %2 current-node) {} new-neighbours)]
+            new-parents (reduce #(assoc %1 %2 current-cell) {} new-neighbours)]
         (recur (sort-by :cost (concat updated-open new-open-nodes))
-               (conj visited-nodes current-node)
+               (conj visited-cells current-cell)
                (merge parents updated-parents new-parents))))))
 
 ;;(navigate-to (create-grid 5 5) (cell 0 0) (cell 0 2))
