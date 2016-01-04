@@ -17,27 +17,40 @@
         mid-bot (cell 1 2)
         right-bot (cell 2 2)]
     
-    (is (= #{(traversal-diag left-top) (traversal-unit mid-top) (traversal-diag right-top)
-             (traversal-unit left-mid) (traversal-unit right-mid)
-             (traversal-diag left-bot) (traversal-unit mid-bot) (traversal-diag right-bot)}
+    (is (= {:neighbours #{left-top mid-top right-top
+                          left-mid right-mid
+                          left-bot mid-bot right-bot}
+            :traversals {left-top diagonal-cost, mid-top 1.0, right-top diagonal-cost,
+                         left-mid 1.0, right-mid 1.0,
+                         left-bot diagonal-cost, mid-bot 1.0, right-bot diagonal-cost}}
            (neighbours-of grid-3x3 mid-mid))
         "all eight neighbours")
-    (is (= #{(traversal-unit left-top) (traversal-diag mid-top)
-             (traversal-unit mid-mid)
-             (traversal-unit left-bot) (traversal-diag mid-bot)}
+    (is (= {:neighbours #{left-top mid-top
+                          mid-mid
+                          left-bot mid-bot}
+            :traversals {left-top 1.0, mid-top diagonal-cost,
+                         mid-mid 1.0,
+                         left-bot 1.0, mid-bot diagonal-cost}}
            (neighbours-of grid-3x3 left-mid))
         "left edge")
-    (is (= #{(traversal-diag mid-top) (traversal-unit right-top)
-             (traversal-unit mid-mid)
-             (traversal-diag mid-bot) (traversal-unit right-bot)}
+    (is (= {:neighbours #{mid-top right-top
+                          mid-mid
+                          mid-bot right-bot}
+            :traversals {mid-top diagonal-cost, right-top 1.0,
+                         mid-mid 1.0,
+                         mid-bot diagonal-cost, right-bot 1.0}}
            (neighbours-of grid-3x3 right-mid))
         "right edge")
-    (is (= #{(traversal-unit left-top) (traversal-unit right-top)
-             (traversal-diag left-mid) (traversal-unit mid-mid) (traversal-diag right-mid)}
+    (is (= {:neighbours #{left-top right-top
+                          left-mid mid-mid right-mid}
+            :traversals {left-top 1.0, right-top 1.0,
+                         left-mid diagonal-cost, mid-mid 1.0, right-mid diagonal-cost}}
            (neighbours-of grid-3x3 mid-top))
         "top edge")
-    (is (= #{(traversal-diag left-mid) (traversal-unit mid-mid) (traversal-diag right-mid)
-             (traversal-unit left-bot) (traversal-unit right-bot)}
+    (is (= {:neighbours #{left-mid mid-mid right-mid
+                          left-bot right-bot}
+            :traversals {left-mid diagonal-cost, mid-mid 1.0, right-mid diagonal-cost,
+                         left-bot 1.0, right-bot 1.0}}
            (neighbours-of grid-3x3 mid-bot))
         "bottom edge")))
 
