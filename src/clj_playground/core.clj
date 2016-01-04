@@ -50,14 +50,15 @@ and :traversals is a map of cells to costs ??"
 
 ;; (neighbours-of (create-grid 3 3) (cell 1 1))
 
-(defn create-route [parents current-node create-route]
+(defn create-route [parents current-node]
   "takes a parents list of form {child parent} and finds route from current-node to first nil parent"
-  (let [parent (parents current-node)]
-    (if (nil? parent) ;; at end of the road
-      create-route 
-      (recur parents
-             parent
-             (conj create-route current-node)))))
+  (loop [current-node current-node
+         created-route '()]
+    (let [parent (parents current-node)]
+      (if (nil? parent) ;; at end of the road
+        created-route 
+        (recur parent
+               (conj created-route current-node))))))
 
 (defn navigate-to [grid start dest]
   "provides route from start to dest, not including start"
@@ -67,7 +68,7 @@ and :traversals is a map of cells to costs ??"
          visited-nodes #{}
          parents {}]
     (if (= dest current-node) 
-      (create-route parents current-node '()) 
+      (create-route parents current-node) 
       (let [;; traversals is list of {:cell :cost}
             {all-neighbours :neighbours traversals :traversals} (neighbours-of
                                                                  grid
