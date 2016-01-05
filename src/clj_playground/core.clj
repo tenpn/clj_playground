@@ -30,8 +30,9 @@
        (>= (c :y) 0)
        (< (c :y) (grid :height))))
 
-(definline validate-cell [grid c]
+(defn validate-cell 
   "asserts if any part of the cell isn't in the grid"
+  [grid c]
   (assert (>= (c :x) 0))
   (assert (< (c :x) (grid :width)))
   (assert (>= (c :y) 0))
