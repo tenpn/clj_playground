@@ -1,8 +1,9 @@
 (ns clj-playground.core
   (:require [clojure.set :as set]))
 
-(defn cell [x y]
+(defn cell 
   "coordinates of a map cell"
+  [x y]
   {:x x :y y})
 
 (def diagonal-cost (Math/sqrt 2))
@@ -18,8 +19,9 @@
   (cell (+ (origin :x) (translate :x))
         (+ (origin :y) (translate :y))))
 
-(defn create-grid [width height]
+(defn create-grid  
   "creates grid of set dimensions. width and height are exclusive."
+  [width height]
   {:width width :height height})
 
 (defn valid-cell? [grid c]
@@ -35,10 +37,11 @@
   (assert (>= (c :y) 0))
   (assert (< (c :y) (grid :height))))
 
-(defn neighbours-of [grid origin]
+(defn neighbours-of 
   "neighbours around square 2D grid cell. returns {:neighbours :traversals} 
-where :neighbours is a set of neighbouring absolute cells
-and :traversals is a map of cells to costs ??"
+  where :neighbours is a set of neighbouring absolute cells
+  and :traversals is a map of cells to costs"
+  [grid origin]
   (validate-cell grid origin)
   (let [valid-neighbours (->> [(cell  -1 -1) (cell 0 -1) (cell 1 -1)
                                (cell -1 0) (cell 1 0)
@@ -50,8 +53,9 @@ and :traversals is a map of cells to costs ??"
 
 ;; (neighbours-of (create-grid 3 3) (cell 1 1))
 
-(defn create-route [parents current-cell]
+(defn create-route 
   "takes a parents list of form {child parent} and finds route from current-cell to first nil parent"
+  [parents current-cell]
   (loop [current-cell current-cell
          created-route '()]
     (let [parent (parents current-cell)]
@@ -60,8 +64,9 @@ and :traversals is a map of cells to costs ??"
         (recur parent
                (conj created-route current-cell))))))
 
-(defn navigate-to [grid start dest]
+(defn navigate-to 
   "provides route from start to dest, not including start"
+  [grid start dest]
   (validate-cell grid start)
   (validate-cell grid dest)
   (loop [[{current-cell :cell current-cost :cost} & open-nodes] (list (traversal 0 start))
