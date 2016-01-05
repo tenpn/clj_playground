@@ -25,25 +25,18 @@
   {:width width :height height})
 
 (defn valid-cell? [grid c]
+  {:pre [(not-any? nil? [grid c])]}
   (and (>= (c :x) 0)
        (< (c :x) (grid :width))
        (>= (c :y) 0)
        (< (c :y) (grid :height))))
-
-(defn validate-cell 
-  "asserts if any part of the cell isn't in the grid"
-  [grid c]
-  (assert (>= (c :x) 0))
-  (assert (< (c :x) (grid :width)))
-  (assert (>= (c :y) 0))
-  (assert (< (c :y) (grid :height))))
 
 (defn neighbours-of 
   "neighbours around square 2D grid cell. returns {:neighbours :traversals} 
   where :neighbours is a set of neighbouring absolute cells
   and :traversals is a map of cells to costs"
   [grid origin]
-  (validate-cell grid origin)
+  {:pre [(valid-cell? grid origin)]}
   (let [valid-neighbours (->> [(cell  -1 -1) (cell 0 -1) (cell 1 -1)
                                (cell -1 0) (cell 1 0)
                                (cell -1 1) (cell 0 1) (cell 1 1)]
@@ -55,8 +48,10 @@
 ;; (neighbours-of (create-grid 3 3) (cell 1 1))
 
 (defn create-route 
-  "takes a parents list of form {child parent} and finds route from current-cell to first nil parent"
+  "takes a parents map of form {child parent} and finds route from current-cell to first nil parent."
   [parents current-cell]
+  {:pre [(not-any? nil? [parents current-cell])]
+   :post [(some? %)]}
   (loop [current-cell current-cell
          created-route '()]
     (let [parent (parents current-cell)]
@@ -68,8 +63,8 @@
 (defn navigate-to 
   "provides route from start to dest, not including start"
   [grid start dest]
-  (validate-cell grid start)
-  (validate-cell grid dest)
+  {:pre [(valid-cell? grid start)
+         (valid-cell? grid dest)]}
   (loop [[{current-cell :cell current-cost :cost} & open-nodes] (list (traversal 0 start))
          visited-cells #{}
          parents {}]
@@ -109,4 +104,5 @@
                (conj visited-cells current-cell)
                (merge parents updated-parents new-parents))))))
 
-;;(navigate-to (create-grid 5 5) (cell 0 0) (cell 0 2))
+;;(navigate-to (create-grid 5 5) (cell 0 0) (cell 0 -2))
+
