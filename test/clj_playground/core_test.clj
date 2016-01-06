@@ -2,6 +2,10 @@
   (:require [clojure.test :refer :all]
             [clj-playground.core :refer :all]))
 
+(deftest grid-creation
+  (is (= (create-grid 3 3 :obstacles #{(cell 1 1)})
+         (create-grid 3 3 :obstacles [(cell 1 1)]))))
+
 (deftest neighbours-of-t
   (let [grid-3x3 (create-grid 3 3)
 
@@ -58,19 +62,25 @@
   (let [big-grid (create-grid 5 5)
         some-start (cell 0 0)
         some-neighbour (cell 1 0)]
-    (is (= []
-           (navigate-to big-grid some-start some-start))
-        "when navigating to self, route is empty")
-    (is (= [some-neighbour]
-           (navigate-to big-grid some-start some-neighbour))
-        "when navigating to neighbour, only destination in route")
-    (is (= [(cell 1 0) (cell 2 0)]
-           (navigate-to big-grid (cell 0 0) (cell 2 0)))
-        "straight simple route")
-    (is (= [(cell 1 1) (cell 2 2)]
-           (navigate-to big-grid (cell 0 0) (cell 2 2)))
-        "another simple route")
-    (is (= [(cell 0 1) (cell 0 2)]
-           (navigate-to big-grid (cell 0 0) (cell 0 2)))
-        "shortest route")
-    ))
+    (testing "simple navigation"
+      (is (= []
+             (navigate-to big-grid some-start some-start))
+          "when navigating to self, route is empty")
+      (is (= [some-neighbour]
+             (navigate-to big-grid some-start some-neighbour))
+          "when navigating to neighbour, only destination in route")
+      (is (= [(cell 1 0) (cell 2 0)]
+             (navigate-to big-grid (cell 0 0) (cell 2 0)))
+          "straight simple route")
+      (is (= [(cell 1 1) (cell 2 2)]
+             (navigate-to big-grid (cell 0 0) (cell 2 2)))
+          "another simple route")
+      (is (= [(cell 0 1) (cell 0 2)]
+             (navigate-to big-grid (cell 0 0) (cell 0 2)))
+          "shortest route")))
+  (let [blocked-grid (create-grid 5 5 :obstacles [(cell 1 0)])]
+    (testing "obstacles"
+      (is (= [(cell 1 1) (cell 2 0)]
+             (navigate-to blocked-grid (cell 0 0) (cell 2 0)))
+          "obstacles are routed around"))))
+             

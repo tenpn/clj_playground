@@ -21,13 +21,16 @@
 
 (defn create-grid  
   "creates grid of set dimensions. width and height are exclusive."
-  [width height]
-  {:width width :height height})
+  [width height & {:keys [obstacles]}]
+  {:width width :height height :obstacles (set obstacles)})
 
-(defn valid-cell? [grid c]
+(defn valid-cell?
+  "false if this cell cannot be moved through, maybe because it's outside the grid"
+  [grid c]
   {:pre [(not-any? nil? [grid c])]}
   (and (< -1 (:x c) (:width grid))
-       (< -1 (:y c) (:height grid))))
+       (< -1 (:y c) (:height grid))
+       (not (contains? (:obstacles grid) c))))
 
 (defn neighbours-of 
   "neighbours around square 2D grid cell. returns {:neighbours :traversals} 
@@ -42,8 +45,6 @@
                               (filter (partial valid-cell? grid)))]
     {:neighbours (set valid-neighbours)
      :traversals (reduce #(assoc %1 %2 (traversal-cost %2 origin)) {} valid-neighbours)}))
-
-;; (neighbours-of (create-grid 3 3) (cell 1 1))
 
 (defn create-route 
   "takes a parents map of form {child parent} and finds route from current-cell to first nil parent."
