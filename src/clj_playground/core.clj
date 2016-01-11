@@ -57,7 +57,30 @@
       (recur parent
              (conj created-route current-cell))
       ;; else parent is nil, and it's the end of the road
-      created-route))) 
+      created-route)))
+
+(defn get-better-cells
+  "set of cells which have a better route to the goal than current"
+  [all-traversals candidate-cells new-costs]
+  (->> all-traversals
+       (filter
+        (fn [{open-cell :cell current-cost :cost}]
+          (and (contains? candidate-cells open-cell)
+               (> current-cost (new-costs open-cell)))))
+       (map :cell)
+       set))
+
+(defn merge-costs
+  "if traversal is cheaper with candidate, then switch"
+  [{open-cell :cell :as original-traversal} better-cells new-costs]
+  (if (contains? better-cells open-cell)
+    (traversal (new-costs open-cell) open-cell)
+    original-traversal))
+
+(defn map-from-list
+  "takes a func of form (_ _ -> [k v]) and runs it over a coll to get a map"
+  [pair coll]
+  (into {} (for [c coll] (pair c))))
 
 (defn navigate-to 
   "provides route from start to dest, not including start"
@@ -75,30 +98,23 @@
                                                                  current-cell)
             unvisited-neighbours (set/difference all-neighbours visited-cells)
             ;; add current route cost to traversals:
-            neighbour-total-distances (into {}
-                                            (for [[neighbour cost] traversals]
-                                              [neighbour (+ current-cost cost)]))
+            neighbour-new-costs (into {} (for [[neighbour cost] traversals]
+                                           [neighbour (+ current-cost cost)]))
             ;; keep bigger distances
             ;; ...first merge in seen neighbours, keeping higher values
-            better-neighbours (->> open-nodes
-                                   (filter
-                                    (fn [{open-cell :cell current-cost :cost :as open-node}]
-                                      (and (contains? unvisited-neighbours open-cell)
-                                           (> current-cost
-                                              (neighbour-total-distances open-cell)))))
-                                   (map :cell)
-                                   set)
-            updated-open (map (fn [{open-cell :cell current-cost :cost :as open-node}]
-                               (if (contains? better-neighbours open-cell)
-                                 (traversal (neighbour-total-distances open-cell) open-cell)
-                                 open-node))
-                              open-nodes)
-            updated-parents (reduce #(assoc %1 %2 current-cell) {} better-neighbours)
+            better-neighbours (get-better-cells
+                               open-nodes
+                               unvisited-neighbours
+                               neighbour-new-costs)
+            updated-open (map
+                          #(merge-costs % better-neighbours neighbour-new-costs)
+                          open-nodes)
+            updated-parents (map-from-list #(vector % current-cell) better-neighbours)
             ;; ...then create new neighbours
             all-open-cells (set (map :cell open-nodes))
             new-neighbours (set/difference unvisited-neighbours all-open-cells)
-            new-open-nodes (map #(traversal (neighbour-total-distances %) %) new-neighbours)
-            new-parents (reduce #(assoc %1 %2 current-cell) {} new-neighbours)]
+            new-open-nodes (map #(traversal (neighbour-new-costs %) %) new-neighbours)
+            new-parents (map-from-list #(vector % current-cell) new-neighbours)]
         (recur (sort-by :cost (concat updated-open new-open-nodes))
                (conj visited-cells current-cell)
                (merge parents updated-parents new-parents))))))
