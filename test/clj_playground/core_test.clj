@@ -78,9 +78,12 @@
       (is (= [(cell 0 1) (cell 0 2)]
              (navigate-to big-grid (cell 0 0) (cell 0 2)))
           "shortest route")))
-  (let [blocked-grid (create-grid 5 5 :obstacles [(cell 1 0)])]
+  (let [blockage (cell 1 0)
+        blocked-grid (create-grid 5 5 :obstacles [blockage])]
     (testing "obstacles"
       (is (= [(cell 1 1) (cell 2 0)]
              (navigate-to blocked-grid (cell 0 0) (cell 2 0)))
-          "obstacles are routed around"))))
+          "obstacles are routed around")
+      (is (= nil
+             (navigate-to blocked-grid (cell 0 0) blockage))))))
              

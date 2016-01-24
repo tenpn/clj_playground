@@ -85,8 +85,7 @@
 (defn navigate-to 
   "provides route from start to dest, not including start"
   [grid start dest]
-  {:pre [(valid-cell? grid start)
-         (valid-cell? grid dest)]}
+  {:pre [(valid-cell? grid start)]}
   (loop [[{current-cell :cell current-cost :cost} & open-nodes] (list (traversal 0 start))
          visited-cells #{}
          parents {}]
